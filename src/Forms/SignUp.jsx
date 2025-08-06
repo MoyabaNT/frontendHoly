@@ -11,17 +11,28 @@ const SignUp = () => {
   const [message, setMessage] = useState(null);
   const navigate = useNavigate();
 
+  // Password validation regex: 8+ chars, 1 uppercase, 1 lowercase, 1 number, 1 special char
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
   const handleSignUp = async (e) => {
     e.preventDefault();
     setError(null);
     setMessage(null);
+
+    // Validate password
+    if (!passwordRegex.test(password)) {
+      setError(
+        'Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&).'
+      );
+      return;
+    }
+
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(userCredential.user, { displayName: username });
       await sendEmailVerification(userCredential.user);
       setMessage('Verification email sent! Please check your inbox.');
       console.log('User signed up successfully:', { email, username });
-      // Delay navigation to allow message display
       setTimeout(() => navigate('/SignIn'), 3000);
     } catch (err) {
       console.error('Sign-up error:', err.code, err.message);
